@@ -72,10 +72,3 @@ select
 
 from source_data
 
--- Add incremental logic if needed for dbt runs, though the Python script handles API fetching incrementally.
--- This dbt model typically processes the entire staging table content loaded by the Python script.
--- If you wanted dbt to manage incremental processing *within the warehouse*:
--- {% if is_incremental() %}
--- where try_cast(response_timestamp AS timestamp) > (select max(response_timestamp) from {{ this }})
--- {% endif %}
-

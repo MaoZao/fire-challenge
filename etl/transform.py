@@ -14,17 +14,17 @@ logger = logging.getLogger(__name__)
 # Refer to https://dev.socrata.com/foundry/data.sfgov.org/wr8u-xric for column details
 EXPECTED_DTYPES = {
     'incident_number': 'string',
-    'exposure_number': 'Int64', # Use nullable integer type
+    'exposure_number': 'Int64', 
     'id': 'string',
     'address': 'string',
-    'incident_date': 'string', # Keep as string for now, parse later if needed
+    'incident_date': 'string', 
     'call_number': 'string',
-    'alarm_dttm': 'string', # Keep as string, parse later
-    'arrival_dttm': 'string', # Keep as string, parse later
-    'close_dttm': 'string', # Keep as string, parse later
+    'alarm_dttm': 'string',
+    'arrival_dttm': 'string', 
+    'close_dttm': 'string', 
     'city': 'string',
     'zipcode': 'string',
-    'battalion': 'string', # Keep as string, will become dimension key
+    'battalion': 'string', 
     'station_area': 'string',
     'box': 'string',
     'suppression_units': 'Int64',
@@ -34,7 +34,7 @@ EXPECTED_DTYPES = {
     'other_units': 'Int64',
     'other_personnel': 'Int64',
     'first_unit_on_scene': 'string',
-    'estimated_property_loss': 'Float64', # Use nullable float
+    'estimated_property_loss': 'Float64', 
     'estimated_contents_loss': 'Float64',
     'fire_fatalities': 'Int64',
     'fire_injuries': 'Int64',
@@ -59,7 +59,7 @@ EXPECTED_DTYPES = {
     'structure_status': 'string',
     'floor_of_fire_origin': 'Int64',
     'fire_spread': 'string',
-    'no_flame_spead': 'string', # Typo in source? Keep as is for now.
+    'no_flame_spead': 'string', 
     'number_of_floors_with_minimum_damage': 'Int64',
     'number_of_floors_with_significant_damage': 'Int64',
     'number_of_floors_with_heavy_damage': 'Int64',
@@ -70,16 +70,15 @@ EXPECTED_DTYPES = {
     'detector_effectiveness': 'string',
     'detector_failure_reason': 'string',
     'automatic_extinguishing_system_present': 'string',
-    'automatic_extinguishing_sytem_type': 'string', # Typo in source?
-    'automatic_extinguishing_sytem_perfomance': 'string', # Typo in source?
-    'automatic_extinguishing_sytem_failure_reason': 'string', # Typo in source?
+    'automatic_extinguishing_sytem_type': 'string',
+    'automatic_extinguishing_sytem_perfomance': 'string', 
+    'automatic_extinguishing_sytem_failure_reason': 'string', 
     'number_of_sprinkler_heads_operating': 'Int64',
     'supervisor_district': 'string',
-    'neighborhood_district': 'string', # Dimension candidate
-    'point': 'string', # Geo data, keep as string for now
-    'data_as_of': 'string', # Keep as string, parse later
-    'data_loaded_at': 'string' # Dimension candidate
-    # Add other columns as needed, defaulting to 'string' if unsure
+    'neighborhood_district': 'string', 
+    'point': 'string', 
+    'data_as_of': 'string', 
+    'data_loaded_at': 'string' 
 }
 
 # --- Date/Time Columns to Parse ---
@@ -208,26 +207,9 @@ def perform_data_quality_checks(df: pd.DataFrame) -> pd.DataFrame:
         else:
             logger.info("DQ Check PASSED: No duplicate 'incident_number' values found within the batch.")
 
-
-    # 3. Check date/time columns for parsing errors (represented as NaT after to_datetime with errors='coerce')
-    # This check is implicitly done if you check for nulls after conversion attempt
-    # for col in DATETIME_COLUMNS:
-    #     if col in df.columns and pd.api.types.is_datetime64_any_dtype(df[col]):
-    #         parsing_errors = df[col].isnull().sum()
-    #         if parsing_errors > 0:
-    #             logger.warning(f"DQ Check WARNING: Column '{col}' has {parsing_errors} values that could not be parsed as dates/times.")
-    #             # issues_found = True # Decide if this is critical
-
-    # 4. Check for unexpected values in categorical columns (example: battalion)
     if 'battalion' in df.columns:
-        # Example: Check if all battalion values start with 'B' followed by digits
-        # This is a placeholder - adjust based on actual expected patterns
-        # invalid_battalions = df[~df['battalion'].astype(str).str.match(r'^B\d+$', na=False)]['battalion'].unique()
-        # if len(invalid_battalions) > 0:
-        #     logger.warning(f"DQ Check WARNING: Found potentially invalid battalion codes: {invalid_battalions}")
-            # issues_found = True
-        pass # Add more specific checks if needed
-
+       
+        pass # Check that battalion is a valid value (e.g., in a predefined list)
 
     if not issues_found:
         logger.info("All basic data quality checks passed.")
@@ -247,19 +229,11 @@ def transform_data(df: pd.DataFrame) -> Union[pd.DataFrame, None]:
 
     logger.info(f"Starting transformation process for DataFrame with shape {df.shape}...")
 
-    # 1. Clean column names
     df = clean_column_names(df)
 
-    # 2. Convert data types (handle potential errors)
-    # Convert types *before* DQ checks that might depend on them
     df = convert_data_types(df)
 
-    # 3. Perform Data Quality Checks (before loading)
     df = perform_data_quality_checks(df)
-
-    # 4. Add any other transformations needed before loading
-    # Example: Create a composite key if necessary, handle specific missing values, etc.
-    # df['load_timestamp'] = datetime.now() # Add metadata if desired
 
     logger.info(f"Transformation process completed. Output DataFrame shape: {df.shape}")
 

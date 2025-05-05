@@ -64,16 +64,7 @@ def save_last_run_timestamp(timestamp: str):
 
 
 def upsert_data(engine: Engine, df: pd.DataFrame, table_name: str, unique_key: str):
-    """
-    Upserts data from a Pandas DataFrame into a PostgreSQL table.
-    It uses ON CONFLICT DO UPDATE based on a specified unique key.
 
-    Args:
-        engine: SQLAlchemy database engine.
-        df: Pandas DataFrame containing the data to upsert.
-        table_name: Name of the target table in the database.
-        unique_key: The column name that uniquely identifies a row (primary key).
-    """
     if df.empty:
         logger.info("DataFrame is empty. No data to upsert.")
         return
@@ -106,16 +97,17 @@ def upsert_data(engine: Engine, df: pd.DataFrame, table_name: str, unique_key: s
 
         # Convert Pandas NA and Numpy NaN values to None, which psycopg2 can handle as NULL
         # This must be done before converting to numpy/tuples
-        df = df.replace({pd.NA: None, np.nan: None})
+        df_filtered = df_filtered.replace({pd.NA: None, np.nan: None})
 
         # Prepare data for executemany - convert DataFrame to list of tuples
-        data_tuples = [tuple(x) for x in df.to_numpy()]
-        # Prepare column names and placeholders using only the filtered columns
+        # Use df_filtered here
+        data_tuples = [tuple(x) for x in df_filtered.to_numpy()]
         cols_sql = ', '.join([f'"{col}"' for col in cols_to_upsert]) # Quote column names
         update_cols = [f'"{col}" = EXCLUDED."{col}"' for col in cols_to_upsert if col != unique_key]
         update_sql = ', '.join(update_cols)
 
         # --- Construct and Execute UPSERT ---
+        # i need to improve this 
         # Construct the UPSERT SQL statement
         # Using ON CONFLICT requires specifying the constraint or the column(s)
         # Assuming the unique_key column has a unique constraint/index
@@ -129,9 +121,9 @@ def upsert_data(engine: Engine, df: pd.DataFrame, table_name: str, unique_key: s
         # Use psycopg2's execute_values for efficient bulk insertion/upsertion
         from psycopg2.extras import execute_values
         execute_values(cursor, sql, data_tuples, page_size=500) # Adjust page_size as needed
-        
+
         conn.commit()
-        logger.info(f"Successfully upserted {len(df)} rows into {table_name}.")
+        logger.info(f"Successfully upserted {len(df_filtered)} rows into {table_name}.")
 
     except Exception as e:
         if conn:
@@ -160,8 +152,6 @@ def create_staging_table(engine: Engine, df: pd.DataFrame, table_name: str):
         );
         """
     else:
-        # Generate CREATE TABLE statement dynamically based on DataFrame columns
-        # Use TEXT for all columns initially for simplicity in staging
         column_defs = [f'"{col}" TEXT' for col in df.columns if col != 'incident_number']
         create_sql = f"""
         CREATE TABLE IF NOT EXISTS {table_name} (
@@ -174,8 +164,6 @@ def create_staging_table(engine: Engine, df: pd.DataFrame, table_name: str):
         with engine.connect() as connection:
             connection.execute(text(create_sql))
             logger.info(f"Ensured table {table_name} exists.")
-            # Optionally, you could add missing columns here if the table already exists
-            # This requires querying INFORMATION_SCHEMA.COLUMNS and ALTER TABLE ADD COLUMN
 
     except SQLAlchemyError as e:
         logger.error(f"Error creating or checking staging table {table_name}: {e}", exc_info=True)

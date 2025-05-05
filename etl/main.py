@@ -53,9 +53,6 @@ def run_etl():
             sys.exit(1) # Exit with error code
         elif raw_data_df.empty:
             logger.info("No new data extracted. ETL process finished.")
-            # Optionally update the timestamp even if no new data,
-            # to prevent reprocessing if the source hasn't changed
-            # Or just exit gracefully
             sys.exit(0)
         else:
             logger.info(f"Extraction successful. Fetched {raw_data_df.shape[0]} records.")

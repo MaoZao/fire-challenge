@@ -11,7 +11,7 @@ This project provides a robust pipeline to ingest, process, and model fire incid
     * **ETL (Python):** Basic validation (null keys, batch duplicates), type coercion during transformation.
     * **DWH (dbt):** Comprehensive tests (uniqueness, non-null, referential integrity, custom expectations) applied after data loading and transformation.
 * **Resilient Loading:** Employs an `UPSERT` (insert or update) strategy when loading data into the staging area, ensuring data reflects the latest state from the source and handles potential re-fetching gracefully.
-* **Dimensional Modeling for Analytics:** Transforms raw data into a clean, analytics-ready star schema using dbt. This includes fact (`fct_incidents`) and dimension (`dim_time`, `dim_battalion`, `dim_neighborhood_district`, `dim_analysis_neighborhood`) tables, optimized for BI queries and reporting.
+* **Dimensional Modeling for Analytics:** Transforms raw data into a clean, analytics-ready star schema using dbt. This includes fact (`fct_incidents`) and dimension (`dim_time`, `dim_battalion`, `dim_neighborhood_district`) tables, optimized for BI queries and reporting.
 * **Interactive Visualizations:** Provides pre-configured dashboards and charts via Apache Superset for easy exploration of the incident data.
 * **Modularity & Maintainability:** The Python ETL code is logically separated into extract, transform, and load components. dbt further modularizes the data transformation logic within the warehouse. Superset configurations are stored separately.
 * **Configuration Driven:** Sensitive information (credentials) and key parameters (API endpoints, table names) are externalized to an `.env` file, promoting security and easier configuration management.

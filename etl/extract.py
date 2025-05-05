@@ -61,7 +61,7 @@ def fetch_fire_data(last_run_timestamp: Union[str, None]) -> Union[pd.DataFrame,
     else:
         logger.info("Performing full data fetch (no last run timestamp found).")
 
-    max_iterations = 10
+    max_iterations = 10 # i need to improve that to make the where work with the offset
     iteration_count = 0
     # Loop to fetch data in batches
     while True:

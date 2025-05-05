@@ -1,10 +1,5 @@
 -- dbt_project/analysis/incident_aggregations_report.sql
 -- Example analysis showing how to use the dimensional model.
--- Aggregates incidents by year, month, battalion, and neighborhood district.
-
--- You can run this using `dbt compile` and then executing the compiled SQL,
--- or using `dbt run-operation run_analysis --args '{analysis_name: incident_aggregations_report}'` (requires macro)
--- Or simply copy/paste the compiled SQL into a SQL client.
 
 select
     -- Time Dimensions
@@ -31,11 +26,7 @@ from {{ ref('fct_incidents') }} fi
 join {{ ref('dim_time') }} dt on fi.time_key = dt.time_key
 join {{ ref('dim_battalion') }} db on fi.battalion_key = db.battalion_key
 join {{ ref('dim_neighborhood_district') }} dnd on fi.neighborhood_district_key = dnd.neighborhood_district_key
--- Optionally join other dimensions like dim_analysis_neighborhood
 
--- Add filters if needed, e.g., for a specific year or battalion
--- where dt.year = 2023
--- and db.battalion_code = 'B05'
 
 group by
     dt.year,
