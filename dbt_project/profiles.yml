@@ -1,0 +1,23 @@
+# dbt_project/profiles.yml
+# Defines connection profiles for dbt. Use environment variables for security.
+
+sf_fire_profile: # Matches profile name in dbt_project.yml
+  target: dev # Default target environment
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('DB_HOST') }}" # Read from environment variable
+      user: "{{ env_var('DB_USER') }}"
+      password: "{{ env_var('DB_PASSWORD') }}"
+      port: "{{ env_var('DB_PORT') | int }}" # Convert port env var to integer
+      dbname: "{{ env_var('DB_NAME') }}"
+      schema: "{{ env_var('DBT_TARGET_SCHEMA', 'analytics') }}" # Target schema for models, default 'analytics'
+      threads: 4 # Number of parallel threads dbt can use
+      keepalives_idle: 0 # optional, prevent timeout on long queries
+      connect_timeout: 10 # optional
+
+# You can define other targets like 'prod' here if needed
+# prod:
+#   type: postgres
+#   host: "{{ env_var('PROD_DB_HOST') }}"
+#   ... etc

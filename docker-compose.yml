@@ -1,0 +1,63 @@
+services:
+  postgres:
+    container_name: sf_fire_postgres # Consider removing fixed container names unless necessary
+    image: postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped # Good practice to add a restart policy
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - 6379:6379
+
+  superset-db:
+    image: postgres
+    container_name: superset-db
+    environment:
+      POSTGRES_USER: superset
+      POSTGRES_PASSWORD: superset
+      POSTGRES_DB: superset
+    volumes:
+      - superset-db-data:/var/lib/postgresql/data
+
+  superset:
+    build:
+      context: .
+      dockerfile: ./config_superset/superset.Dockerfile
+    container_name: superset
+    environment:
+      SUPERSET_CONFIG_PATH: /app/pythonpath/superset_config.py
+      PYTHONPATH: /app/pythonpath:/app/docker/pythonpath_dev
+      POSTGRES_USER: superset
+      POSTGRES_PASSWORD: superset
+      POSTGRES_DB: superset
+      POSTGRES_HOST: superset-db
+    volumes:
+      - ./config_superset:/app/pythonpath
+      - superset-data:/app/superset_home
+    ports:
+      - 8088:8088
+    depends_on:
+      - redis
+      - superset-db
+    entrypoint:
+      - sh
+      - -c
+      - |
+        superset fab create-admin --username admin --firstname Superset --lastname Admin --email admin@superset.com --password admin && \
+        superset db upgrade && \
+        superset init && \
+        superset run --host 0.0.0.0 -p 8088 --with-threads --reload
+
+volumes:
+  postgres-data:
+  superset-data:
+  superset-db-data:

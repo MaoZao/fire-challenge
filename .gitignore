@@ -1,0 +1,32 @@
+# .gitignore
+# Specifies intentionally untracked files that Git should ignore.
+
+# Environment variables
+.env
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.venv/
+env/
+ENV/
+*.env
+
+# IDE and editor directories
+.idea/
+.vscode/
+
+# dbt artifacts
+dbt_project/logs/
+dbt_project/target/
+
+# State file
+etl/last_run_timestamp.txt
+
+# OS generated files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,15 @@
+# dbt_project/models/staging/schema.yml
+# Defines tests and descriptions for staging models.
+
+version: 2
+
+models:
+  - name: stg_sf_fire_incidents
+    description: "Staged fire incident data, cleaned and standardized from the raw source. One row per incident exposure."
+    columns:
+
+      - name: incident_number
+        description: "The unique identifier for the fire incident report."
+        tests:
+          - not_null  
+          - unique
