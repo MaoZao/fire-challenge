@@ -66,3 +66,4 @@ This combination allows each tool to play to its strengths: Python handles exter
 5.  **Explore Dashboards:** Navigate to the pre-built dashboards related to SF Fire Incidents to visualize the data. You can also use SQL Lab within Superset to query the `analytics` schema directly.
 
 
+![Superset Dashboard Example](png/image.png)
