@@ -31,7 +31,7 @@ services:
   superset:
     build:
       context: .
-      dockerfile: ./config_superset/superset.Dockerfile
+      dockerfile: ./superset/superset.Dockerfile
     container_name: superset
     environment:
       SUPERSET_CONFIG_PATH: /app/pythonpath/superset_config.py
@@ -41,7 +41,7 @@ services:
       POSTGRES_DB: superset
       POSTGRES_HOST: superset-db
     volumes:
-      - ./config_superset:/app/pythonpath
+      - ./superset:/app/pythonpath
       - superset-data:/app/superset_home
     ports:
       - 8088:8088
