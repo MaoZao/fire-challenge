@@ -1,63 +1,104 @@
+
+x-airflow-common:
+  &airflow-common
+  build:
+    context: ./containers/airflow/
+  environment:
+    &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__CORE__FERNET_KEY: ''
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__API__AUTH_BACKEND: 'airflow.api.auth.backend.basic_auth'
+    AIRFLOW_CONN_POSTGRES_DEFAULT: postgres://airflow:airflow@postgres:5432/airflow
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./data:/opt/airflow/data
+    - ./visualization:/opt/airflow/visualization
+    - ./logs:/opt/airflow/logs
+    - ./plugins:/opt/airflow/plugins
+    - ./tests:/opt/airflow/tests
+    - ./temp:/opt/airflow/temp
+  user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000}"
+  depends_on:
+    postgres:
+      condition: service_healthy
+
 services:
   postgres:
-    container_name: sf_fire_postgres # Consider removing fixed container names unless necessary
-    image: postgres
+    container_name: postgres
+    image: postgres:16
     environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - ./containers/upstream:/docker-entrypoint-initdb.d
+      - ./data:/input_data
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "airflow" ]
+      interval: 5s
+      retries: 5
+    restart: always
     ports:
       - "5432:5432"
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    restart: unless-stopped # Good practice to add a restart policy
 
-  redis:
-    image: redis:latest
-    container_name: redis
+  airflow-webserver:
+    <<: *airflow-common
+    container_name: webserver
+    command: webserver
     ports:
-      - 6379:6379
+      - 8080:8080
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "--fail",
+          "http://localhost:8080/health"
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    restart: always
 
-  superset-db:
-    image: postgres
-    container_name: superset-db
-    environment:
-      POSTGRES_USER: superset
-      POSTGRES_PASSWORD: superset
-      POSTGRES_DB: superset
-    volumes:
-      - superset-db-data:/var/lib/postgresql/data
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: scheduler
+    command: scheduler
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'airflow jobs check --job-type SchedulerJob --hostname "$${HOSTNAME}"'
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    restart: always
 
-  superset:
-    build:
-      context: .
-      dockerfile: ./superset/superset.Dockerfile
-    container_name: superset
+  airflow-init:
+    <<: *airflow-common
+    command: version
     environment:
-      SUPERSET_CONFIG_PATH: /app/pythonpath/superset_config.py
-      PYTHONPATH: /app/pythonpath:/app/docker/pythonpath_dev
-      POSTGRES_USER: superset
-      POSTGRES_PASSWORD: superset
-      POSTGRES_DB: superset
-      POSTGRES_HOST: superset-db
-    volumes:
-      - ./superset:/app/pythonpath
-      - superset-data:/app/superset_home
+      <<: *airflow-common-env
+      _AIRFLOW_DB_UPGRADE: 'true'
+      _AIRFLOW_WWW_USER_CREATE: 'true'
+      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
+      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
+
+  minio:
+    image: 'minio/minio:latest'
+    hostname: minio
+    container_name: minio
     ports:
-      - 8088:8088
-    depends_on:
-      - redis
-      - superset-db
-    entrypoint:
-      - sh
-      - -c
-      - |
-        superset fab create-admin --username admin --firstname Superset --lastname Admin --email admin@superset.com --password admin && \
-        superset db upgrade && \
-        superset init && \
-        superset run --host 0.0.0.0 -p 8088 --with-threads --reload
+      - '9000:9000'  
+      - '9001:9001'
+    environment:
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: minio123
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+    command: server --console-address ":9001" /data
 
-volumes:
-  postgres-data:
-  superset-data:
-  superset-db-data:
