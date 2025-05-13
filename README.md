@@ -1,33 +1,7 @@
+# Fire Challenge - Feature: Airflow, CI/CD & Testing
 
+## 🔥 Branch Focus: Continuous Improvement on Airflow, CI/CD & Testing 🔥
 
-* [Beginner DE Project - Batch Edition](#beginner-de-project---batch-edition)
-    * [Run Data Pipeline](#run-data-pipeline)
-        * [Run on codespaces](#run-on-codespaces)
-        * [Run locally](#run-locally)
-    * [Architecture](#architecture)
-
-# Beginner DE Project - Batch Edition
-
-Code for blog at [Data Engineering Project for Beginners](https://www.startdataengineering.com/post/data-engineering-project-for-beginners-batch-edition/).
-
-## Run Data Pipeline
-
-Code available at **[beginner_de_project](https://github.com/josephmachado/beginner_de_project)** repository.
-
-### Run on codespaces
-
-You can run this data pipeline using GitHub codespaces. Follow the instructions below.
-
-1. Create codespaces by going to the **[beginner_de_project](https://github.com/josephmachado/beginner_de_project)** repository, cloning it(or click `Use this template` button) and then clicking on `Create codespaces on main` button.
-2. Wait for codespaces to start, then in the terminal type `make up`.
-3. Wait for `make up` to complete, and then wait for 30s (for Airflow to start).
-4. After 30s go to the `ports` tab and click on the link exposing port `8080` to access Airflow UI (username and password is `airflow`).
-
-![Codespace](assets/images/cs1.png)
-![Codespace make up](assets/images/cs2.png)
-![Codespace Airflow UI](assets/images/cs3.png)
-
-**Note** Make sure to switch off codespaces instance, you only have limited free usage; see docs [here](https://github.com/features/codespaces#pricing).
 
 ### Run locally
 
@@ -40,35 +14,70 @@ To run locally, you need:
 Clone the repo and run the following commands to start the data pipeline:
 
 ```bash
-git clone https://github.com/josephmachado/beginner_de_project.git
-cd beginner_de_project 
+git clone -b feature/airflow-ci-cd https://github.com/MaoZao/fire-challenge.git
+cd fire-challenge
 make up
-sleep 30 # wait for Airflow to start
-make ci # run checks and tests
+sleep 30 
+make ci 
 ```
-
 Go to [http:localhost:8080](http:localhost:8080) to see the Airflow UI. Username and password are both `airflow`.
 
-## Architecture
+Welcome to the `feature/airflow-ci-cd` branch! This branch is a dedicated workspace for the ongoing enhancement and modernization of the Fire Challenge project. Our primary efforts here are centered around three key pillars:
 
-This data engineering project, includes the following:
+1.  **Apache Airflow Integration & Enhancement:**
+    * Developing, refining, and managing data pipelines and workflows using Apache Airflow.
+    * Exploring best practices for DAG (Directed Acyclic Graph) design, scheduling, monitoring, and alerting.
+    * Aiming for more resilient, scalable, and observable data processes.
 
-1. **`Airflow`**: To schedule and orchestrate DAGs.
-2. **`Postgres`**: To store Airflow's details (which you can see via Airflow UI) and also has a schema to represent upstream databases.
-3. **`DuckDB`**: To act as our warehouse
-4. **`Quarto with Plotly`**: To convert code in `markdown` format to html files that can be embedded in your app or servered as is.
-5. **`Apache Spark`**: To process our data, specifically to run a classification algorithm.
-6. **`minio`**: To provide an S3 compatible open source storage system.
+2.  **CI/CD Pipeline Implementation & Optimization:**
+    * Building and improving automated pipelines for Continuous Integration (CI) to ensure that new code changes are frequently and reliably integrated and tested.
+    * Establishing Continuous Delivery/Deployment (CD) practices to streamline the release process, enabling faster and more consistent delivery of new features and fixes.
+    * Utilizing tools and techniques to automate builds, testing, and deployments.
 
-For simplicity services 1-5 of the above are installed and run in one container defined [here](./containers/airflow/Dockerfile).
+3.  **Comprehensive Testing Strategies:**
+    * Implementing and expanding various levels of testing (e.g., unit tests, integration tests, end-to-end tests) to ensure code quality and stability.
+    * Focusing on test automation to provide quick feedback and reduce manual effort.
+    * Adhering to testing best practices to catch bugs early and ensure the reliability of new and existing features.
 
-![Data pipeline design](assets/images/arch.png)
+## 🌱 Continuous Improvement Philosophy
 
-The `user_analytics_dag` DAG in the [Airflow UI](http://localhost:8080) will look like the below image:
+This branch embodies a commitment to iterative development and continuous improvement. We believe that by focusing on these critical areas—Airflow for workflow orchestration, CI/CD for development agility, and rigorous testing for quality—we can significantly enhance the robustness, efficiency, and maintainability of the Fire Challenge project.
 
-![DAG](assets/images/dag.png)
+While the primary goals of this branch are complete and the features are working as intended, some final adjustments and refinements are underway to ensure a smooth and seamless integration with the `main` branch. This may include:
 
-On completion, you can see the dashboard html rendered at[./dags/scripts/dashboard/dashboard.html](./dags/scripts/dashboard/dashboard.html).
+* Final code reviews and cleanup.
+* Documentation updates.
+* Addressing any minor pending tasks or feedback.
+* Ensuring compatibility and resolving any potential conflicts with recent changes in `main`.
 
-Read **[this post](https://www.startdataengineering.com/post/data-engineering-projects-with-free-template/)**, for information on setting up CI/CD, IAC(terraform), "make" commands and automated testing.
+The aim is to merge these powerful enhancements into the main project codebase shortly, bringing improved automation, reliability, and development velocity to the Fire Challenge.
 
+## 🎯 Goals for this Branch
+
+* **Automate Everything:** Strive to automate repetitive tasks in the development, testing, and deployment lifecycle.
+* **Improve Reliability:** Increase the stability and reliability of the application through comprehensive testing and robust data pipelines.
+* **Increase Development Velocity:** Enable faster and more frequent releases of high-quality software.
+* **Enhance Observability:** Improve the monitoring and logging capabilities of our Airflow DAGs and CI/CD pipelines.
+* **Foster Best Practices:** Serve as a proving ground for modern DevOps and Data Engineering practices.
+
+## 🛠️ Technologies & Focus Areas (Examples - customize as needed)
+
+* **Workflow Orchestration:** Apache Airflow
+* **CI/CD Tools:** (e.g., GitHub Actions)
+* **Testing Frameworks:** (e.g., PyTest)
+* **Containerization:** (e.g., Docker)
+
+## 🤝 Contributing
+
+Contributions, suggestions, and feedback on these areas are highly encouraged within this branch. If you are working on features related to Airflow, CI/CD, or testing, please base your work on this branch and submit Pull Requests here.
+
+## 🖼️ Visual Representation
+
+To visually represent our focus, here's an image that encapsulates the key elements of this branch:
+
+![Airflow CI/CD Testing](assets/images/arquitetura.png) 
+
+
+## 🖼️ Visual DAGs
+
+![Airflow DAG](assets/images/dags.png) 
